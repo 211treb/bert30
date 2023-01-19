@@ -1,0 +1,85 @@
+_schema-version: '3.1'
+ID: bert30
+version: 1.0.0
+description: "A simple CAP project."
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npx -p @sap/cds-dk cds build --production
+modules:
+  - name: bert30-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm-ci
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: bert30-auth
+  - name: bert30-destinations
+    type: com.sap.application.content
+    requires:
+      - name: bert30-auth
+        parameters:
+          service-key:
+            name: bert30-auth-key
+      - name: bert30-html5-repo-host
+        parameters:
+          service-key:
+            name: bert30-html5-repo-host-key
+      - name: srv-api
+      - name: bert30-destination
+        parameters:
+          content-target: true
+    parameters:
+      content:
+        instance:
+          destinations:
+            - Authentication: OAuth2UserTokenExchange
+              Name: bert30-app-srv
+              TokenServiceInstanceName: bert30-auth
+              TokenServiceKeyName: bert30-auth-key
+              URL: '~{srv-api/srv-url}'
+              sap.cloud.service: bert30.service
+            - Name: bert30-html5-repo-host
+              ServiceInstanceName: bert30-html5-repo-host
+              ServiceKeyName: bert30-html5-repo-host-key
+              sap.cloud.service: bert30.service
+            - Authentication: OAuth2UserTokenExchange
+              Name: bert30-auth
+              ServiceInstanceName: bert30-auth
+              ServiceKeyName: bert30-auth-key
+              sap.cloud.service: bert30.service
+          existing_destination_policy: update
+    build-parameters:
+      no-source: true
+resources:
+  - name: bert30-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: bert30-${space}
+        tenant-mode: dedicated
+  - name: bert30-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite
+      config:
+        HTML5Runtime_enabled: true
+  - name: bert30-html5-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:DataServices>
+        <Schema Namespace="Service" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+            <EntityContainer Name="EntityContainer">
+                <EntitySet Name="Equipments" EntityType="Service.Equipments"/>
+            </EntityContainer>
+            <EntityType Name="Equipments">
+                <Key>
+                    <PropertyRef Name="equipmentId"/>
+                </Key>
+                <Property Name="equipmentId" Type="Edm.String" Nullable="false"/>
+                <Property Name="name" Type="Edm.String"/>
+                <Property Name="category" Type="Edm.String"/>
+                <Property Name="shortDescription" Type="Edm.String"/>
+                <Property Name="longDescription" Type="Edm.String"/>
+            </EntityType>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

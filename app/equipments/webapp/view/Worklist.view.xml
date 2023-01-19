@@ -1,0 +1,68 @@
+<mvc:View controllerName="equipments.controller.Worklist" xmlns="sap.m" xmlns:mvc="sap.ui.core.mvc" xmlns:semantic="sap.f.semantic">
+    <semantic:SemanticPage id="page" headerPinnable="false" toggleHeaderOnTitleClick="false">
+        <semantic:titleHeading>
+            <Title text="{i18n>worklistTitle}" level="H2" />
+        </semantic:titleHeading>
+
+        <semantic:content>
+            <Table
+                id="table"
+                width="auto"
+                items="{
+                    path: '/Equipments',
+                    sorter: {
+                        path: 'equipmentId',
+                        descending: false
+                    }
+                }"
+                noDataText="{worklistView>/tableNoDataText}"
+                busyIndicatorDelay="{worklistView>/tableBusyDelay}"
+                growing="true"
+                growingScrollToLoad="true"
+                updateFinished=".onUpdateFinished"
+            >
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <Title id="tableHeader" text="{worklistView>/worklistTableTitle}" level="H3" />
+                        <ToolbarSpacer />
+                        <SearchField id="searchField" tooltip="{i18n>worklistSearchTooltip}" search=".onSearch">
+                            <layoutData>
+                                <OverflowToolbarLayoutData maxWidth="200px" priority="NeverOverflow" />
+                            </layoutData>
+                        </SearchField>
+                    </OverflowToolbar>
+                </headerToolbar>
+
+                <columns>
+                    <!-- <Column id="equipmentIdColumn">
+                        <Text text="{i18n>tableEquipmentIdColumnTitle}" id="equipmentIdColumnTitle" />
+                    </Column> -->
+                    <Column id="internalIdColumn">
+                        <Text text="{i18n>tableInternalIdColumnTitle}" id="internalIdColumnTitle" />
+                    </Column>
+                    <Column id="shortDescriptionColumn">
+                        <Text text="{i18n>tableShortDescriptionColumnTitle}" id="shortDescriptionColumnTitle" />
+                    </Column>
+                    <Column id="modelNameColumn">
+                        <Text text="{i18n>tableModelNameColumnTitle}" id="modelNameColumnTitle" />
+                    </Column>
+                </columns>
+
+                <items>
+                    <ColumnListItem type="Navigation" press=".onPress">
+                        <cells>
+                            <ObjectIdentifier title="{internalId}" />
+                            <Text text="{shortDescription}" id="nameValue" />
+                            <Text text="{modelName}" id="modelNameValue" />
+                            <ObjectNumber />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </semantic:content>
+
+        <semantic:sendEmailAction>
+            <semantic:SendEmailAction id="shareEmail" press=".onShareEmailPress" />
+        </semantic:sendEmailAction>
+    </semantic:SemanticPage>
+</mvc:View>

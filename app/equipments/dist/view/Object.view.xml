@@ -1,0 +1,39 @@
+<mvc:View
+    controllerName="equipments.controller.Object"
+    xmlns="sap.m"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:semantic="sap.f.semantic"
+    xmlns:l="sap.ui.layout">
+
+    <semantic:SemanticPage
+        id="page"
+        headerPinnable="false"
+        toggleHeaderOnTitleClick="false"
+        busy="{objectView>/busy}"
+        busyIndicatorDelay="{objectView>/delay}">
+
+        <semantic:titleHeading>
+            <Title
+                text="{shortDescription}"
+                level="H2"/>
+        </semantic:titleHeading>
+
+        <semantic:headerContent>
+            <ObjectNumber />
+        </semantic:headerContent>
+
+        <semantic:sendEmailAction>
+            <semantic:SendEmailAction id="shareEmail" press=".onShareEmailPress"/>
+        </semantic:sendEmailAction>
+        <semantic:content>
+            <l:VerticalLayout>
+                <ObjectStatus text="{internalId}" title="{i18n>internalIdLabel}" />
+                <ObjectStatus text="{shortDescription}" title="{i18n>shortDescriptionLabel}" />
+                <ObjectStatus text="{modelName}" title="{i18n>modelNameLabel}" />
+
+                <ObjectStatus text="{longDescription}" title="{i18n>longDescriptionLabel}" />
+            </l:VerticalLayout>
+        </semantic:content>
+    </semantic:SemanticPage>
+
+</mvc:View>
