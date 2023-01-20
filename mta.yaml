@@ -1,87 +1,118 @@
-_schema-version: '3.1'
+_schema-version: "3.1"
 ID: bert30
+description: A simple CAP project.
 version: 1.0.0
-description: "A simple CAP project."
+modules:
+- name: bert30-srv
+  type: nodejs
+  path: gen/srv
+  requires:
+  - name: bert30-auth
+  provides:
+  - name: srv-api
+    properties:
+      srv-url: ${default-url}
+  parameters:
+    buildpack: nodejs_buildpack
+  build-parameters:
+    builder: npm-ci
+- name: bert30-destinations
+  type: com.sap.application.content
+  requires:
+  - name: bert30-auth
+    parameters:
+      service-key:
+        name: bert30-auth-key
+  - name: bert30-html5-repo-host
+    parameters:
+      service-key:
+        name: bert30-html5-repo-host-key
+  - name: srv-api
+  - name: bert30-destination
+    parameters:
+      content-target: true
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Authentication: OAuth2UserTokenExchange
+          Name: bert30-app-srv
+          TokenServiceInstanceName: bert30-auth
+          TokenServiceKeyName: bert30-auth-key
+          URL: ~{srv-api/srv-url}
+          sap.cloud.service: bert30.service
+        - Name: bert30-html5-repo-host
+          ServiceInstanceName: bert30-html5-repo-host
+          ServiceKeyName: bert30-html5-repo-host-key
+          sap.cloud.service: bert30.service
+        - Authentication: OAuth2UserTokenExchange
+          Name: bert30-auth
+          ServiceInstanceName: bert30-auth
+          ServiceKeyName: bert30-auth-key
+          sap.cloud.service: bert30.service
+        existing_destinations_policy: update
+  build-parameters:
+    no-source: true
+- name: bert30-app-content
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: bert30-html5-repo-host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - equipments.zip
+      name: equipments
+      target-path: resources/
+- name: equipments
+  type: html5
+  path: app/equipments
+  build-parameters:
+    build-result: dist
+    builder: custom
+    commands:
+    - npm install
+    - npm run build:cf
+    supported-platforms: []
+resources:
+- name: bert30-auth
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      tenant-mode: dedicated
+      xsappname: bert30-${org}-${space}
+    path: ./xs-security.json
+    service: xsuaa
+    service-plan: application
+- name: bert30-destination
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      init_data:
+        instance:
+          destinations:
+          - Authentication: NoAuthentication
+            Name: ui5
+            ProxyType: Internet
+            Type: HTTP
+            URL: https://ui5.sap.com
+          existing_destinations_policy: update
+    service: destination
+    service-plan: lite
+- name: bert30-html5-repo-host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-plan: app-host
 parameters:
+  deploy_mode: html5-repo
   enable-parallel-deployments: true
 build-parameters:
   before-all:
-    - builder: custom
-      commands:
-        - npx -p @sap/cds-dk cds build --production
-modules:
-  - name: bert30-srv
-    type: nodejs
-    path: gen/srv
-    parameters:
-      buildpack: nodejs_buildpack
-    build-parameters:
-      builder: npm-ci
-    provides:
-      - name: srv-api # required by consumers of CAP services (e.g. approuter)
-        properties:
-          srv-url: ${default-url}
-    requires:
-      - name: bert30-auth
-
-  - name: bert30-destinations
-    type: com.sap.application.content
-    requires:
-      - name: bert30-auth
-        parameters:
-          service-key:
-            name: bert30-auth-key
-      - name: bert30-html5-repo-host
-        parameters:
-          service-key:
-            name: bert30-html5-repo-host-key
-      - name: srv-api
-      - name: bert30-destination
-        parameters:
-          content-target: true
-    parameters:
-      content:
-        instance:
-          destinations:
-            - Authentication: OAuth2UserTokenExchange
-              Name: bert30-app-srv
-              TokenServiceInstanceName: bert30-uaa
-              TokenServiceKeyName: bert30-auth-key
-              URL: '~{srv-api/srv-url}'
-              sap.cloud.service: bert30.service
-            - Name: bert30-html5-repo-host
-              ServiceInstanceName: bert30-html5-repo-host
-              ServiceKeyName: bert30-html5-repo-host-key
-              sap.cloud.service: bert30.service
-            - Authentication: OAuth2UserTokenExchange
-              Name: bert30-auth
-              ServiceInstanceName: bert30-auth
-              ServiceKeyName: bert30-auth-key
-              sap.cloud.service: bert30.service
-          existing_destinations_policy: update
-    build-parameters:
-      no-source: true
-
-resources:
-  - name: bert30-auth
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: xsuaa
-      service-plan: application
-      path: ./xs-security.json
-      config:
-        xsappname: bert30-${org}-${space}
-        tenant-mode: dedicated
-  - name: bert30-destination
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: destination
-      service-plan: lite
-      config:
-        HTML5Runtime_enabled: true
-  - name: bert30-html5-repo-host
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: html5-apps-repo
-      service-plan: app-host
-    
+  - builder: custom
+    commands:
+    - npx -p @sap/cds-dk cds build --production
