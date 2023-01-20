@@ -23,6 +23,7 @@ modules:
           srv-url: ${default-url}
     requires:
       - name: bert30-auth
+
   - name: bert30-destinations
     type: com.sap.application.content
     requires:
@@ -44,7 +45,7 @@ modules:
           destinations:
             - Authentication: OAuth2UserTokenExchange
               Name: bert30-app-srv
-              TokenServiceInstanceName: bert30-auth
+              TokenServiceInstanceName: bert30-uaa
               TokenServiceKeyName: bert30-auth-key
               URL: '~{srv-api/srv-url}'
               sap.cloud.service: bert30.service
@@ -57,9 +58,10 @@ modules:
               ServiceInstanceName: bert30-auth
               ServiceKeyName: bert30-auth-key
               sap.cloud.service: bert30.service
-          existing_destination_policy: update
+          existing_destinations_policy: update
     build-parameters:
       no-source: true
+
 resources:
   - name: bert30-auth
     type: org.cloudfoundry.managed-service
@@ -68,7 +70,7 @@ resources:
       service-plan: application
       path: ./xs-security.json
       config:
-        xsappname: bert30-${space}
+        xsappname: bert30-${org}-${space}
         tenant-mode: dedicated
   - name: bert30-destination
     type: org.cloudfoundry.managed-service
@@ -82,4 +84,4 @@ resources:
     parameters:
       service: html5-apps-repo
       service-plan: app-host
-
+    
