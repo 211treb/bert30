@@ -8,6 +8,7 @@ modules:
   path: gen/srv
   requires:
   - name: bert30-auth
+  - name: bert30-destination
   provides:
   - name: srv-api
     properties:
